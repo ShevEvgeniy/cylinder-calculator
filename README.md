@@ -2,7 +2,7 @@
 
 > Внутренний инструмент для автоматизированного расчёта заказов по теплоизоляционным цилиндрам
 
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-live-brightgreen?style=flat-square&logo=github)](https://YOUR_USERNAME.github.io/cylinder-calculator)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-live-brightgreen?style=flat-square&logo=github)](https://ShevEvgeniy.github.io/cylinder-calculator)
 ![Версия](https://img.shields.io/badge/версия-1.0.0-blue?style=flat-square)
 ![Статус](https://img.shields.io/badge/статус-в%20разработке-orange?style=flat-square)
 
@@ -34,12 +34,12 @@
 ## 🚀 Быстрый старт
 
 ### Открыть онлайн
-👉 **[YOUR_USERNAME.github.io/cylinder-calculator](https://YOUR_USERNAME.github.io/cylinder-calculator)**
+👉 **[ShevEvgeniy.github.io/cylinder-calculator](https://ShevEvgeniy.github.io/cylinder-calculator)**
 
 ### Локально
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/YOUR_USERNAME/cylinder-calculator.git
+git clone https://github.com/ShevEvgeniy/cylinder-calculator.git
 
 # Открыть файл в браузере
 open index.html
