@@ -296,6 +296,7 @@
           <div><div class="rg-label">Транспортный объём</div><div class="rg-val" id="rr-transport" style="color:var(--text)">—</div><div class="rg-unit">м³ (коробки)</div></div>
           <div><div class="rg-label">Объём фактический</div><div class="rg-val" id="rr-vol-actual" style="color:var(--muted)">—</div><div class="rg-unit">м³ (с округлением)</div></div>
         </div>
+        <button class="add-btn" style="margin-top:18px;margin-bottom:0" onclick="addReverseToMulti()">+ Добавить позицию в список</button>
       </div>
     </div>
   </div>
@@ -482,6 +483,17 @@ function calculateReverse(){
   document.getElementById('rr-transport').textContent=(boxes*BOX_VOL).toFixed(2);
   document.getElementById('rr-vol-actual').textContent=(qty*vpc).toFixed(3);
   document.getElementById('reverseResult').classList.add('show');
+}
+
+function addReverseToMulti(){
+  const type=document.getElementById('rev-type').value;
+  const diam=Number(document.getElementById('rev-diam').value);
+  const thick=Number(document.getElementById('rev-thick').value);
+  const qtyText=document.getElementById('rr-qty').textContent || '0';
+  const qty=Number(qtyText.replace(/\s/g,'')) || 0;
+  if(!qty) return;
+  setMode('multi');
+  addPosition({type,diam,thick,pog:qty});
 }
 
 // FIX 3: add from single to multi
