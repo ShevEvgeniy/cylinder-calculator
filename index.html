@@ -802,13 +802,18 @@ function addToMultiFromSingle(){
 
 // FIX 2 + FIX 4: multi rows with separate diam/thick and all 4 types
 let posCount=0;
+// Тип / плотность, выбранные во вкладке «Несколько позиций»,
+// используются как значение по умолчанию для следующих новых позиций.
+let multiDefaultType='isol100';
+
 function addPosition(pf){
   posCount++;
   const id=posCount;
   pf=pf||{};
+  const selectedType=pf.type||multiDefaultType;
   const diamOpts=DIAMETERS.map(d=>`<option value="${d}"${d===(pf.diam||89)?' selected':''}>${d}</option>`).join('');
   const thickOpts=THICKNESSES.map(t=>`<option value="${t}"${t===(pf.thick||30)?' selected':''}>${t}</option>`).join('');
-  const typeOpts=[['isol80','EXPERT ISOL 80'],['isol80f','EXPERT ISOL 80-Ф'],['isol100','EXPERT ISOL 100'],['isol100f','EXPERT ISOL 100-Ф']].map(([v,l])=>`<option value="${v}"${v===(pf.type||'isol100')?' selected':''}>${l}</option>`).join('');
+  const typeOpts=[['isol80','EXPERT ISOL 80'],['isol80f','EXPERT ISOL 80-Ф'],['isol100','EXPERT ISOL 100'],['isol100f','EXPERT ISOL 100-Ф']].map(([v,l])=>`<option value="${v}"${v===selectedType?' selected':''}>${l}</option>`).join('');
   const div=document.createElement('div');
   div.className='pos-row';
   div.id=`pos-${id}`;
@@ -819,6 +824,12 @@ function addPosition(pf){
     <div class="field" style="margin:0"><label>П.м. трубопровода</label><input type="number" class="p-pog" value="${pf.pog||50}" min="0" step="0.1"></div>
     <button class="del-btn" onclick="removePos(${id})">✕</button>`;
   document.getElementById('positionsContainer').appendChild(div);
+
+  // Изменение типа в любой позиции влияет только на новые позиции.
+  // Уже существующие строки не изменяются автоматически.
+  div.querySelector('.p-type').addEventListener('change',function(){
+    multiDefaultType=this.value;
+  });
 }
 
 function removePos(id){ const el=document.getElementById(`pos-${id}`); if(el)el.remove(); }
@@ -834,34 +845,46 @@ function calculateMulti(){
     const di=getDensityIdx(type);
     const bq=getBoxQty(diam,thick);
     const wpc=getWeightPerCyl(diam,thick,di);
-    const vpc=cylVolumeM3(diam,thick);
     const qty=Math.ceil(pog);
+    const boxesRaw=bq?qty/bq:null;
+    const transportRaw=boxesRaw!==null?boxesRaw*BOX_VOL:null;
     results.push({
       typeName:typeLabel(type),diam,thick,pog,qty,
-      boxes:bq?Math.ceil(qty/bq):'—',
+      boxesRaw,
       weight:wpc?(qty*wpc).toFixed(2):'—',
-      vol:(qty*vpc).toFixed(3)
+      transportRaw
     });
   });
-  let tQ=0,tB=0,tW=0,tV=0;
+
+  let tQ=0,tBoxesRaw=0,tW=0;
   results.forEach(r=>{
     tQ+=typeof r.qty==='number'?r.qty:0;
-    tB+=typeof r.boxes==='number'?r.boxes:0;
+    tBoxesRaw+=typeof r.boxesRaw==='number'?r.boxesRaw:0;
     tW+=r.weight!=='—'?parseFloat(r.weight):0;
-    tV+=parseFloat(r.vol);
   });
+
+  // Во вкладке «Несколько позиций» коробки по строкам не округляем.
+  // Округление вверх выполняется только один раз — после суммирования всех позиций.
+  const totalBoxes=Math.ceil(tBoxesRaw);
+  const totalTransport=totalBoxes*BOX_VOL;
+
   const rowsHtml=results.map((r,i)=>`
     <tr>
       <td style="color:var(--muted);font-size:10px">${i+1}</td>
       <td class="name-cell">${r.typeName}<br><span style="color:var(--muted);font-size:9px">Ø${r.diam} × ${r.thick} мм</span></td>
-      <td>${r.pog.toFixed(1)}</td><td class="val">${r.qty}</td><td class="val2">${r.boxes}</td><td>${r.vol}</td><td class="val3">${r.weight}</td>
+      <td>${r.pog.toFixed(1)}</td>
+      <td class="val">${r.qty}</td>
+      <td class="val2">${r.boxesRaw===null?'—':r.boxesRaw.toFixed(2)}</td>
+      <td>${r.transportRaw===null?'—':r.transportRaw.toFixed(3)}</td>
+      <td class="val3">${r.weight}</td>
     </tr>`).join('');
+
   document.getElementById('summaryTableContainer').innerHTML=`
     <div class="summary-wrap">
       <table class="summary-table">
-        <thead><tr><th>№</th><th>Позиция</th><th>П.М.</th><th>Шт</th><th>Коробок</th><th>М³</th><th>Вес, кг</th></tr></thead>
+        <thead><tr><th>№</th><th>Позиция</th><th>П.М.</th><th>Шт</th><th>Коробок</th><th>Транспортный объём, м³</th><th>Вес, кг</th></tr></thead>
         <tbody>${rowsHtml}
-          <tr class="total-row"><td colspan="2">ИТОГО</td><td>—</td><td>${tQ}</td><td>${tB}</td><td>${tV.toFixed(3)}</td><td>${tW.toFixed(2)}</td></tr>
+          <tr class="total-row"><td colspan="2">ИТОГО</td><td>—</td><td>${tQ}</td><td>${totalBoxes}</td><td>${totalTransport.toFixed(3)}</td><td>${tW.toFixed(2)}</td></tr>
         </tbody>
       </table>
     </div>`;
