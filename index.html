@@ -625,6 +625,9 @@ const THICKNESSES = [20,30,40,50,60,70,80,90,100];
 // FIX 1: объём коробки 0.300 м³
 const BOX_VOL = 0.300;
 
+// Вес одной транспортной коробки, кг
+const BOX_WEIGHT = 1.8;
+
 const BOX_QTY = {
   18:{20:77,30:40,40:24,50:15,60:12,70:8,80:6,90:6,100:4},21:{20:66,30:35,40:23,50:15,60:11,70:8,80:6,90:5,100:4},
   25:{20:54,30:35,40:23,50:15,60:11,70:7,80:6,90:4,100:4},28:{20:45,30:34,40:20,50:14,60:11,70:6,80:6,90:4,100:4},
@@ -868,6 +871,11 @@ function calculateMulti(){
   const totalBoxes=Math.ceil(tBoxesRaw);
   const totalTransport=totalBoxes*BOX_VOL;
 
+  // Вес упаковки считаем только после итогового округления количества коробок.
+  const totalCylinderWeight=tW;
+  const totalBoxWeight=totalBoxes*BOX_WEIGHT;
+  const totalOrderWeight=totalCylinderWeight+totalBoxWeight;
+
   const rowsHtml=results.map((r,i)=>`
     <tr>
       <td style="color:var(--muted);font-size:10px">${i+1}</td>
@@ -882,9 +890,11 @@ function calculateMulti(){
   document.getElementById('summaryTableContainer').innerHTML=`
     <div class="summary-wrap">
       <table class="summary-table">
-        <thead><tr><th>№</th><th>Позиция</th><th>П.М.</th><th>Шт</th><th>Коробок</th><th>Транспортный объём, м³</th><th>Вес, кг</th></tr></thead>
+        <thead><tr><th>№</th><th>Позиция</th><th>П.М.</th><th>Шт</th><th>Коробок</th><th>Транспортный объём, м³</th><th>Вес цилиндров, кг</th></tr></thead>
         <tbody>${rowsHtml}
-          <tr class="total-row"><td colspan="2">ИТОГО</td><td>—</td><td>${tQ}</td><td>${totalBoxes}</td><td>${totalTransport.toFixed(3)}</td><td>${tW.toFixed(2)}</td></tr>
+          <tr class="total-row"><td colspan="2">ИТОГО ЦИЛИНДРЫ</td><td>—</td><td>${tQ}</td><td>${totalBoxes}</td><td>${totalTransport.toFixed(3)}</td><td>${totalCylinderWeight.toFixed(2)}</td></tr>
+          <tr class="total-row"><td colspan="6">ВЕС КОРОБОК (${totalBoxes} × ${BOX_WEIGHT.toFixed(1)} кг)</td><td>${totalBoxWeight.toFixed(2)}</td></tr>
+          <tr class="total-row"><td colspan="6">ОБЩИЙ ВЕС ЗАКАЗА</td><td>${totalOrderWeight.toFixed(2)}</td></tr>
         </tbody>
       </table>
     </div>`;
